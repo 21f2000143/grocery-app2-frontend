@@ -1,16 +1,16 @@
 <template>
-  <div class="container">
-    <h1>Add Category</h1>
-    <form method="POST" @submit.prevent="addcategory">
+  <div class="d-flex justify-content-center align-items-center">
+    <div class="card p-4 position-relative">
+      <button type="button" class="btn-close position-absolute top-0 end-0 m-3" aria-label="Close" @click="goBack"></button>
+      <h1>Add Category</h1>
+      <form method="POST" @submit.prevent="addcategory">
         <div class="mb-3">
-            <label for="name" class="form-label">Category Name</label>
-            <input type="text" class="form-control" v-model="name"  required>
+          <label for="name" class="form-label">Category Name</label>
+          <input type="text" class="form-control" v-model="name" required>
         </div>
-        <div v-if="progress" class="spinner-border text-success" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <button v-else type="submit" class="btn btn-primary" @click="addcategory">Submit</button>
-    </form>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </form>
+    </div>
   </div>
 </template>
 
@@ -19,17 +19,18 @@ export default {
   data() {
     return {
       name:'',
-      progress:false
     };
   },
   methods:{
+    goBack(){
+      this.$router.go(-1)
+    },
     async addcategory() {
       try {
-        this.progress=true;
         const response = await fetch('http://127.0.0.1:8000/api/categories',{
           method: 'POST',
           headers: {
-            'Authentication-Token': sessionStorage.getItem('auth_token'),
+            'Authentication-Token': this.$store.getters.authenticateUser.auth_token,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
@@ -38,12 +39,11 @@ export default {
         });
         if (response.status === 201) {
           const data = await response.json();
-          this.progress=false
-          this.$emit('closeEvent', data.message);
+          alert(data.message)
+          this.$router.go(-1);
         } else {
           const data = await response.json();
           alert(data.message);
-          this.$emit('closeEvent', 'Something went wrong');
         }
       } catch (error) {
         console.error(error);

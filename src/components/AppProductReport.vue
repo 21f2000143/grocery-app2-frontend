@@ -1,4 +1,10 @@
 <template>
+  <div class="d-flex justify-content-center align-items-center">
+    <div class="card p-4">
+      <div class="d-flex justify-content-between mb-3 w-75">
+          <button type="button" class="btn-close position-absolute top-0 end-0 m-3" aria-label="Close" @click="goBack"></button>
+    </div>
+      <!-- Cart Summary -->
     <div class="container mt-5">
         <h1>Products Report</h1>
         <table class="table">
@@ -20,13 +26,12 @@
             </tbody>
         </table>
     </div>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-  props: {
-    requestedReport: String
-  },
   data() {
     return {
       data_list: [],
@@ -38,7 +43,7 @@ export default {
         const response = await fetch('http://127.0.0.1:8000/get/report/data', {
           method: 'GET',
           headers: {
-            'Authentication-Token': sessionStorage.getItem('auth_token'),
+            'Authentication-Token': this.$store.getters.authenticateUser.auth_token,
             'Content-Type': 'application/json',
           },
         });
@@ -49,18 +54,17 @@ export default {
         } else {
           const data = await response.json();
           alert(data.message);
-          this.$emit('closeEvent', 'Something went wrong');
         }
       } catch (error) {
         console.error(error);
       }
     },
+    goBack(){
+      this.$router.go(-1)
+    }    
   },
-  watch: {
-    requestedReport: function () {
-      if(this.requestedReport==='ready')
-        this.getReport();
-    }
+  mounted(){
+    this.getReport()
   }
 }
 </script>

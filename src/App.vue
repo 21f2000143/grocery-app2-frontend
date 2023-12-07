@@ -1,69 +1,59 @@
 <template>
-  <div id="app">
-    <ul class="nav nav-pills nav-fill gap-2 p-1 small bg-primary rounded-5 shadow-sm" role fixed-bottom="tablist" style="--bs-nav-link-color: var(--bs-white); --bs-nav-pills-link-active-color: var(--bs-primary); --bs-nav-pills-link-active-bg: var(--bs-white);">
-      <li class="nav-item" role="presentation">
-        <button :class="currentRouteClass1" class="nav-link rounded-5" id="home-tab2" data-bs-toggle="tab" type="button" role="tab"  @click="SwtichAdmin()">Admin: Hi I am a Admin</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button :class="currentRouteClass2" class="nav-link rounded-5" id="profile-tab2" data-bs-toggle="tab" type="button" role="tab"  @click="SwtichUser()">User: Hi I am a User</button>
-      </li>
-      <li class="nav-item" role="presentation">
-        <button :class="currentRouteClass3" class="nav-link rounded-5" id="contact-tab2" data-bs-toggle="tab" type="button" role="tab"  @click="SwtichManager()">Manager:  Hi I am a Manager</button>
-      </li>
-    </ul>
-    <router-view/>  
-  </div>
+  <router-view v-slot="{ Component }">
+    <transition name="slide">
+      <component :is="Component" />
+    </transition>
+  </router-view>
 </template>
 
-<style>
-  .scroll-container {
-    position: relative;
-    overflow-x: auto;
-    overflow-y: hidden;
-    white-space: nowrap;
-    margin-bottom: 20px;
-  }
-
-  .scroll-item {
-    display: inline-block;
-    width: 200px;
-    height: 50px;
-    margin-right: 10px;
-    margin-bottom: 5px;
-    background-image:"../assets/Group-33704.avif";
-  }
-
-  .curve-corner {
-    border-radius: 2% 2% 2% 2%;
-  }
-</style>
-
 <script>
-import router from './router';
-
 export default {
-  methods:{
-    SwtichUser() {
-      (this.$route.path.indexOf('/')==0 && this.$route.path.indexOf('/manager')!=0) && this.$route.path.indexOf('/admin')!=0 ?' ' : router.push('/');
-    },
-    SwtichManager() {
-      this.$route.path.indexOf('/manager')==0 ? '' : router.push('/manager');
-
-    },
-    SwtichAdmin() {
-      this.$route.path.indexOf('/admin')==0 ? '' : router.push('/admin'); 
+  methods: {
+    async checkAuth() {
+      let authToken='';
+      const authTokenCookie = document.cookie.split('; ').find(row => row.startsWith('authToken='));
+      if (authTokenCookie) {
+        authToken = authTokenCookie.split('=')[1];
+      } else {
+        console.error('Auth token cookie not found');
+      }
+      try {
+        this.presslogin=true;
+        const response = await fetch('http://127.0.0.1:8000/api/auth/check', {
+          method: 'GET',
+          mode: "cors",
+          headers: {
+            'Authentication-Token': authToken,
+            'Content-Type': 'application/json'
+          }          
+        });
+        if (response.status === 200) {
+          const data = await response.json();
+          const authObj = {'auth_token':data['auth_token'],
+          'role':data['role'], 'email':data['email']}
+          this.$store.commit('setAuthStatus', authObj);
+          if(data['role']==='admin'){
+            this.$router.push('/admin')
+          }
+          else if(data['role']==='manager'){
+            this.$router.push('manager')
+          }
+          else {
+            this.$router.push('/user')
+          }
+        } else {
+          if (response.status === 401){
+            if (this.$route.path!='/login')
+              this.$router.push('/login')
+          }
+        }
+      } catch (error) {
+        console.error(error);
+      }
     }
   },
-  computed: {
-    currentRouteClass1() {
-      return this.$route.path.indexOf('/admin')==0 ? 'active' : '';
-    },
-    currentRouteClass3() {
-      return this.$route.path.indexOf('/manager')==0 ? 'active' : '';
-    },
-    currentRouteClass2() {
-      return (this.$route.path.indexOf('/')==0 && this.$route.path.indexOf('/manager')!=0) && this.$route.path.indexOf('/admin')!=0 ? 'active' : '';
-    }
+  mounted(){
+    this.checkAuth()
   }
-}
+};
 </script>

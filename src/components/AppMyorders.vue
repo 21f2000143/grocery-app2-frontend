@@ -1,17 +1,25 @@
 <template>
-    <div class="container mt-5">
-        <h1>Your Order History </h1>
-        <div v-for="( item , index ) in orders" :key="index" :class="colors[index%8]" style="max-width: 18rem;">
+  <div class="d-flex justify-content-center align-items-center">
+    <section class="mt-5 position-relative">
+    <button type="button" class="btn-close position-absolute top-0 end-0 m-3" aria-label="Close" @click="goBack"></button>
+      <h2 class="mb-4">Your Order History</h2>
+      <button type="button" class="btn-close position-absolute top-0 end-0 m-3" @click="goBack"></button>
+      <div class="row">
+        <!-- Product Cards (You can loop through your products here) -->
+        <div v-for="(item, index) in orders" :key="index" :class="colors[index % 8]" style="max-width: 18rem; margin-bottom: 20px;">
+          <div class="card">
             <div class="card-header">{{ item.product_name }}</div>
             <div class="card-body">
-                <h5 class="card-title">Quantity: {{ item.quantity }}</h5>
-                <h5 class="card-title">Date: {{ item.order_date }}</h5>
-                <h5 class="card-title">Total amount: {{ item.amount_paid }}</h5>
+              <h5 class="card-title">Quantity: {{ item.quantity }}</h5>
+              <h5 class="card-title">Date: {{ item.order_date }}</h5>
+              <h5 class="card-title">Total amount: {{ item.amount_paid }}</h5>
             </div>
+          </div>
         </div>
       </div>
+    </section>
+  </div>
 </template>
-
 <script>
 export default {
   data() {
@@ -31,12 +39,16 @@ export default {
     }
   },
   methods: {
+    goBack(){
+      if(this.$route.path!=='/user')
+        this.$router.push('/user')
+    },
     async loadOrders() {
       try {
         const response = await fetch('http://127.0.0.1:8000/api/orders', {
           method: 'GET',
           headers: {
-            'Authentication-Token': sessionStorage.getItem('auth_token'),
+            'Authentication-Token': this.$store.getters.authenticateUser.auth_token,
             'Content-Type': 'application/json',
           }
         });
@@ -46,7 +58,6 @@ export default {
         } else {
           const data = await response.json();
           alert(data.message);
-          this.$emit('closeEvent', 'Something went wrong');
         }
       } catch (error) {
         console.error(error);

@@ -5,8 +5,13 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    // admin_notifications:0,
     cartItems: [],
+    auth: {
+      isAuthenticated: false,
+      auth_token:'',
+      role:'',
+      email:''
+    },
   },
   getters: {
     totalCartPrice: (state) => {
@@ -20,14 +25,11 @@ export default new Vuex.Store({
       const cartItem = state.cartItems.find(item => item.id === itemId);
       return cartItem ? parseInt(cartItem.Qty) : 0;
     },
+    authenticateUser: (state) => {
+      return state.auth;
+    },
   },
   mutations: {
-    // setAdminNotifications(state, message) {
-    //   state.admin_notifications = message;
-    // },
-    // clearAdminNotifications(state) {
-    //   state.admin_notifications = '';
-    // },
     addToCart: (state, newItem) => {
       let flag=true;
       for(let i=0;i<state.cartItems.length;i++){
@@ -61,27 +63,11 @@ export default new Vuex.Store({
         }
       }
     },
-  },
-  actions: {
-
-    // addToCart: ({ commit, state }, newItem) => {
-    //   // Perform async operations if needed
-    //   commit('addToCart', newItem);
-    //   // Optionally, dispatch other actions or update the server
-    // },
-  },
-  modules: {
-    cart: {
-      state: { cartItems: [] },
-      getters: { /* ... */ },
-      mutations: { /* ... */ },
-      actions: { /* ... */ },
-    },
-    auth: {
-      state: { /* ... */ },
-      getters: { /* ... */ },
-      mutations: { /* ... */ },
-      actions: { /* ... */ },
-    },
+    setAuthStatus: (state, authObj) => {
+      state.auth.isAuthenticated=true;
+      state.auth.auth_token = authObj.auth_token;
+      state.auth.email = authObj.email;
+      state.auth.role = authObj.role;
+    } 
   }
 })
