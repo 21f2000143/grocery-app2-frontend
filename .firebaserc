@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "iitm-bsprojects"
-  }
+    "default": "iitm-bsprojects",
+    "groapp": "iitm-bsprojects"
+  },
+  "targets": {},
+  "etags": {}
 }

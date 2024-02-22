@@ -14,7 +14,7 @@
             </div>
             <div class="btn-group" role="group" aria-label="Actions">
               <button type="button" class="btn btn-light">{{ item.Qty }}</button>
-              <button type="button" class="btn btn-success" @click="againAddClick(item.id)">Add</button>
+              <button type="button" class="btn btn-success" @click="againAddClick(item.id, item.Qty)">Add</button>
               <button type="button" class="btn btn-danger" @click="removeClick(item.id)">Remove</button>
             </div>
           </li>
@@ -37,11 +37,22 @@ export default {
       rememberMe: false,
       authenticated: false,
       role:false,
+      products_list: []
     };
   },
   methods: {   
-    againAddClick(id){
-        this.$store.commit('addAgain',id)
+    againAddClick(id, qty){
+        for(let i=0;i<this.products_list.length;i++){
+        if(this.products_list[i].id==id){
+          console.log(this.products_list[i].stock, qty, "sachin")
+          if(this.products_list[i].stock > qty)
+            this.$store.commit('addAgain',id)
+          else{
+            alert("Quantity exceeded")
+          }
+        }
+      }
+        
     },
     removeClick(id){
         this.$store.commit('removeFromCart',id)
@@ -56,8 +67,32 @@ export default {
     goHome(){
       if(this.$route.path!=='/new/view')
       this.$router.push('/new/view')
-    },        
-  } 
+    },
+      async loadProducts() {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/products/getters?request_type=all', {
+          method: 'GET',
+          headers: {
+            'Authentication-Token': this.$store.getters.authenticateUser.auth_token,
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.status === 200) {
+          const data = await response.json();
+          console.log(data, "categories fetched")
+          this.products_list=data;
+        } else {
+          const data = await response.json();
+          alert(data.message);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    },         
+  },
+  mounted(){
+    this.loadProducts()
+  }
 };
 </script>
 

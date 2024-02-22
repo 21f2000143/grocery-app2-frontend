@@ -140,7 +140,7 @@
                 <h5 class="card-title">{{ product.name }}</h5>
                 <p class="card-text">{{ product.DESCR }}</p>
                 <p class="card-text">Price: {{ product.rate_per_unit }}</p>
-                <button class="btn btn-dark" @click="editCat(product.id)">Edit</button>
+                <button class="btn btn-dark" @click="editPro(product.id)">Edit</button>
               </div>
             </div>
           </div>
@@ -227,7 +227,6 @@ export default {
       } catch (error) {
         console.error(error);
       }
-
     },    
     async getReport(){
       this.requestedReport='yes'

@@ -7,8 +7,7 @@
       </div>
       <div class="container mt-5">
         <h1 class="mb-4">Your Shopping Cart</h1>
-        <h4>Quantities in yellow represent the maximum available stock!</h4>
-
+        <h4>if the entered qty is more then available then by default it will take the max available qty</h4>
         <table class="table table-striped mt-4">
           <thead>
             <tr>
